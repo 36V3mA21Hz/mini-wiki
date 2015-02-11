@@ -155,11 +155,13 @@ class SignupPage(WikiHandler):
 
 class LoginPage(WikiHandler):
     def get(self):
-        self.render("login.html")
+        next_url = self.request.headers.get('referer', '/')
+        self.render("login.html", next_url=next_url)
 
     def post(self):
         username = self.request.get("username")
         password = self.request.get("password")
+        next_url = self.request.get("next_url")
         valid_login = False
 
         u = User.getUser(username, password)
@@ -248,11 +250,19 @@ class WikiEntries(db.Model):
         q.order("-created")
         return q
 
+    @classmethod
+    def query_by_id(cls, vid, path):
+        return WikiEntries.get_by_id(vid, parent = WikiEntries.wiki_key(path))
+
 class EditPage(WikiHandler):
     def render_wiki(self, path, subject="", content="", error=""):
-        wikiEntry = WikiEntries.query_by_path(path).get()
-	subject = wikiEntry.subject
-	content = wikiEntry.content
+        vid = self.request.get("q")
+        wikiEntry = None
+        if vid:
+            wikiEntry = WikiEntries.query_by_id(int(vid), path)
+        if wikiEntry:
+            subject = wikiEntry.subject
+            content = wikiEntry.content
         self.render("wikiPost.html", subject=subject, content=content,  error=error)
 
     def get(self, path=""):
@@ -292,7 +302,6 @@ class HistoryPage(WikiHandler):
         history = WikiEntries.query_by_path(path)
         history.fetch(limit = 100)
         entries = list(history)
-        logging.error(len(entries))
 
         if entries:
             self.render("history.html", entries=entries, path=path)

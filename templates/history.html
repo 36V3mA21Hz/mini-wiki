@@ -13,7 +13,7 @@
   {% for entry in entries %}
     <tbody>
     <tr>
-      <td><a href='/_edit?q={{ entry.path}}'>edit</a></td>
+      <td><a href='/_edit{{path}}?q={{entry.key().id()}}'>edit</a></td>
       <td>{{entry.created.strftime("%m/%d/%Y")}}</td>
       <td>{{entry.subject}}</td>
       <td>{{entry.content}}</td>
