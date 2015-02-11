@@ -111,6 +111,7 @@ class Accounts:
 class SignupPage(WikiHandler):
 
     def get(self):
+        #next_url = self.request.headers.get('referer', '/')
         self.render("signup.html")
 
     def post(self):
